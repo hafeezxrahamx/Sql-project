@@ -1,44 +1,107 @@
-# Sql-project
-# Library Management System (LMS) 📚
+create database Library;
+use Library;
 
-This *Library Management System* project is designed to manage a library’s inventory, staff, and customer transactions. It enables efficient tracking of book availability, member activity, and employee roles across multiple branches.
 
-## Project Overview
+create table branch (branch_no int primary key,manager_id int,branch_address varchar(255),contact_no varchar(20));
 
-The system includes a SQL database schema with tables to store information on:
+create table employee (emp_id int primary key,emp_name varchar(100),position varchar(50),salary decimal(10, 2),branch_no int,
+  foreign key (branch_no) references branch(branch_no));
 
-- *Branches* - Details of each library branch.
-- *Employees* - Information on employees, including salary and branch assignments.
-- *Books* - Data on each book’s title, category, rental price, and availability.
-- *Customers* - Library member information and registration date.
-- *Issue and Return Status* - Records of book issues and returns by customers.
+create table books (isbn varchar(20) primary key,book_title varchar(200),category varchar(50),rental_price decimal(10, 2),
+status varchar(10) check(status in ('yes', 'no')),author varchar(100),publisher varchar(100));
 
-## Features and SQL Queries
+create table customer (customer_id int primary key,customer_name varchar(100),customer_address varchar(255),reg_date date
+);
 
-### Core Queries Included
+create table issuestatus (
+  issue_id int primary key,
+  issued_cust int,
+  issued_book_name varchar(200),
+  issue_date date,
+  isbn_book varchar(20),
+  foreign key (issued_cust) references customer(customer_id),
+  foreign key (isbn_book) references books(isbn)
+);
 
-1. *Available Books* - View the titles, categories, and rental prices of books currently available.
-2. *Employee Salaries* - List employees with their salaries, ordered by highest to lowest.
-3. *Issued Books & Customers* - See which books have been issued and to whom.
-4. *Category Counts* - Get the total number of books in each category.
-5. *High-Salary Employees* - Find employees with salaries above Rs. 50,000.
-6. *Inactive Customers* - List members registered before 2022 who haven’t issued any books.
-7. *Employee Count by Branch* - See how many employees are assigned to each branch.
-8. *Customers in June 2023* - Display customers who issued books in June 2023.
-9. *History Books* - Retrieve titles that contain "history."
-10. *Large Branches* - Show branches with more than 5 employees.
-11. *Branch Managers* - List employees managing branches with their branch addresses.
-12. *High Rental Books* - Display customers who issued books with rental prices above Rs. 25.
+create table returnstatus (
+  return_id int primary key,
+  return_cust int,
+  return_book_name varchar(200),
+  return_date date,
+  isbn_book2 varchar(20),
+  foreign key (isbn_book2) references books(isbn));
+  
+insert into branch values
+(1, 1, 'Main Branch', '1234567890'), 
+(2, 2, 'Downtown Branch', '9876543210'), 
+(3, 3, 'University Branch', '5551112222');
 
-## Getting Started
 
-1. *Database Setup*: Run the provided SQL code to create the library database and its tables.
-2. *Sample Data*: Insert initial sample data for testing queries.
-3. *Query Execution*: Use the queries to perform library operations, and take screenshots of the results.
+insert into employee values 
+(1, 'Evelyn Brooks', 'Manager', 60000.00, 1), 
+(2, 'Cameron Lee', 'Assistant', 40000.00, 1), 
+(3, 'Aubrey Patel', 'Manager', 70000.00, 2), 
+(4, 'Lila Brown', 'Librarian', 50000.00, 3), 
+(5, 'Julian Hall', 'Assistant', 45000.00, 2); 
 
-## Submission Instructions
+insert into books values
+('ISBN111', 'To Kill a Mockingbird', 'Fiction', 14.99, 'yes', 'Harper Lee', 'J.B. Lippincott & Co.'), 
+('ISBN222', 'The Great Gatsby', 'Fiction', 12.99, 'yes', 'F. Scott Fitzgerald', 'Charles Scribner\'s Sons'), 
+('ISBN333', 'Pride and Prejudice', 'Fiction', 10.99, 'yes', 'Jane Austen', 'T. Egerton'), 
+('ISBN444', 'The Catcher in the Rye', 'Fiction', 11.99, 'no', 'J.D. Salinger', 'Little, Brown and Company'), 
+('ISBN555', 'The Hunger Games', 'Fiction', 13.99, 'yes', 'Suzanne Collins', 'Scholastic Press');
 
-- Upload the SQL scripts, query results, and screenshots to your GitHub repository.
-- Include a link to the repository for review.
 
----
+insert into customer values
+(11, 'Ava Moreno', '123 Main St', '2022-11-01'), 
+(12, 'Liam Patel', '456 Elm St', '2022-12-01'), 
+(13, 'Sophia Kim', '789 Oak St', '2023-01-01'), 
+(14, 'Emily Wong', '901 Maple St', '2023-02-01'), 
+(15, 'Michael Davis', '234 Pine St', '2023-03-01');
+
+
+insert into issuestatus values
+(11, 11, 'To Kill a Mockingbird', '2023-08-01', 'ISBN111'), 
+(12, 12, 'The Great Gatsby', '2023-08-05', 'ISBN222'), 
+(13, 13, 'Pride and Prejudice', '2023-08-10', 'ISBN333'), 
+(14, 14, 'The Catcher in the Rye', '2023-08-15', 'ISBN444'), 
+(15, 15, 'The Hunger Games', '2023-08-20', 'ISBN555');
+
+insert into returnstatus values
+(11, 11, 'The Nightingale', '2023-08-15', 'ISBN111'), 
+(12, 12, 'The Hate U Give', '2023-08-20', 'ISBN222'), 
+(13, 13, 'The Power', '2023-08-25', 'ISBN333'), 
+(14, 14, 'The Song of Achilles', '2023-08-30', 'ISBN444'), 
+(15, 15, 'The Seven Husbands of Evelyn Hugo', '2023-09-01', 'ISBN555');
+
+insert into employee values
+(11, 'Ruby Singh', 'Librarian', 35000.00, 1), 
+(12, 'Jackson Davis', 'Assistant', 30000.00, 1), 
+(13, 'Sofia Martin', 'Manager', 45000.00, 2), 
+(14, 'Noah Kim', 'Librarian', 38000.00, 2), 
+(15, 'Ethan White', 'Assistant', 32000.00, 3);
+
+select book_title, category, rental_price from books where status = 'yes';
+
+select emp_name, salary from employee order by salary desc;
+
+select b.book_title, c.customer_name from books b join issuestatus i on b.isbn = i.isbn_book join customer c on i.issued_cust = c.customer_id;
+
+select category, count(*) as book_count from books group by category;
+
+select emp_name, position from employee where salary > 50000;
+
+select customer_name from customer where reg_date < '2022-01-01' and customer_id not in (select issued_cust from issuestatus);
+
+select b.branch_no, count(*) as employee_count from branch b join employee e on b.branch_no = e.branch_no group by b.branch_no;
+
+select c.customer_name from customer c join issuestatus i on c.customer_id = i.issued_cust 
+where extract(month from i.issue_date) = 6 and extract(year from i.issue_date) = 2023;
+
+select book_title from books where category = 'history';
+
+select b.branch_no, count(*) as employee_count from branch b join employee e on b.branch_no = e.branch_no group by b.branch_no having count(*) > 5;
+
+select e.emp_name, b.branch_address from employee e join branch b on e.branch_no = b.branch_no;
+
+select c.customer_name from customer c join issuestatus i on c.customer_id = i.issued_cust join books b on i.isbn_book = b.isbn where b.rental_price > 25;
